@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090711054954) do
+ActiveRecord::Schema.define(:version => 20090729085046) do
 
   create_table "activities", :force => true do |t|
     t.integer  "subject_id",   :limit => 11
@@ -370,7 +370,7 @@ ActiveRecord::Schema.define(:version => 20090711054954) do
     t.string   "created_by_login"
     t.integer  "flow",               :limit => 11
     t.integer  "stars_count",        :limit => 11, :default => 0
-    t.integer  "views_count",        :limit => 11, :default => 0,    :null => false
+    t.integer  "views_count",        :limit => 11, :default => 0,     :null => false
     t.integer  "owner_id",           :limit => 11
     t.string   "owner_type"
     t.string   "owner_name"
@@ -381,6 +381,8 @@ ActiveRecord::Schema.define(:version => 20090711054954) do
     t.integer  "site_id",            :limit => 11
     t.datetime "happens_at"
     t.integer  "cover_id",           :limit => 11
+    t.boolean  "public_requested",                 :default => false
+    t.integer  "inappropriate",      :limit => 11, :default => 0
   end
 
   add_index "pages", ["created_by_id"], :name => "index_page_created_by_id"
@@ -428,6 +430,7 @@ ActiveRecord::Schema.define(:version => 20090711054954) do
     t.datetime "updated_at"
     t.datetime "deleted_at"
     t.string   "type"
+    t.integer  "inappropriate", :limit => 11, :default => 0
   end
 
   add_index "posts", ["user_id"], :name => "index_posts_on_user_id"
@@ -552,31 +555,33 @@ ActiveRecord::Schema.define(:version => 20090711054954) do
     t.string  "name"
     t.string  "domain"
     t.string  "email_sender"
-    t.integer "pagination_size",      :limit => 11
-    t.integer "super_admin_group_id", :limit => 11
+    t.integer "pagination_size",          :limit => 11
+    t.integer "super_admin_group_id",     :limit => 11
     t.text    "translators"
     t.string  "translation_group"
     t.string  "default_language"
     t.text    "available_page_types"
     t.text    "evil"
     t.boolean "tracking"
-    t.boolean "default",                            :default => false
-    t.integer "network_id",           :limit => 11
-    t.integer "custom_appearance_id", :limit => 11
-    t.boolean "has_networks",                       :default => true
+    t.boolean "default",                                :default => false
+    t.integer "network_id",               :limit => 11
+    t.integer "custom_appearance_id",     :limit => 11
+    t.boolean "has_networks",                           :default => true
     t.string  "signup_redirect_url"
     t.string  "title"
     t.boolean "enforce_ssl"
     t.boolean "show_exceptions"
     t.boolean "require_user_email"
-    t.integer "council_id",           :limit => 11
+    t.integer "council_id",               :limit => 11
     t.string  "login_redirect_url"
     t.boolean "chat"
     t.boolean "limited"
-    t.integer "signup_mode",          :limit => 1
-    t.string  "email_sender_name",    :limit => 40
+    t.integer "signup_mode",              :limit => 1
+    t.string  "email_sender_name",        :limit => 40
+    t.boolean "needs_email_verification",               :default => false
     t.string  "profiles"
     t.string  "profile_fields"
+    t.integer "moderation_group_id",      :limit => 11
   end
 
   add_index "sites", ["name"], :name => "index_sites_on_name", :unique => true
@@ -787,6 +792,7 @@ ActiveRecord::Schema.define(:version => 20090711054954) do
     t.binary   "tag_id_cache"
     t.string   "language",                  :limit => 5
     t.binary   "admin_for_group_id_cache"
+    t.boolean  "unverified",                              :default => false
   end
 
   add_index "users", ["login"], :name => "index_users_on_login"
