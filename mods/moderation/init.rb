@@ -24,6 +24,6 @@ Dispatcher.to_prepare do
   
   require 'moderation_listener'
   require 'page_view_listener'
-  
+
   apply_mixin_to_model(Site, ModerationSiteExtension)
 end

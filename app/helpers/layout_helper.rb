@@ -11,7 +11,7 @@ module LayoutHelper
       ""
     end
   end
-  
+
   def first_breadcrumb
     @breadcrumbs.first.first if @breadcrumbs.any?
   end
@@ -27,7 +27,7 @@ module LayoutHelper
       [current_site.title]
     ).compact.join(' - ')
   end
-      
+
   ##
   ## STYLESHEET
   ##
@@ -42,7 +42,7 @@ module LayoutHelper
   end
 
   # custom stylesheet
-  # rather than include every stylesheet in every request, some stylesheets are 
+  # rather than include every stylesheet in every request, some stylesheets are
   # only included if they are needed. See Application#stylesheet()
   def optional_stylesheet_tag
     stylesheet = controller.class.stylesheet || {}
@@ -92,7 +92,7 @@ module LayoutHelper
     else
       ['/favicon.ico', '/favicon.png']
     end
-      
+
     %Q[<link rel="shortcut icon" href="#{icon_urls[0]}" type="image/x-icon" />
   <link rel="icon" href="#{icon_urls[1]}" type="image/x-icon" />]
   end
@@ -116,35 +116,51 @@ module LayoutHelper
       "ltr"
     end
   end
-  
+
   ##
   ## JAVASCRIPT
   ##
 
+  # Core js that we always need.
+  # Currently, effects.js and controls.js are required for autocomplete.js.
+  # However, autocomplete uses very little of the controls.js code, which in turn
+  # should not need the effects.js at all. So, with a little effort, effects and
+  # controls could be moved to extra.
+  MAIN_JS = ['prototype', 'application', 'effects', 'controls', 'autocomplete']
+
+  # extra js that we might sometimes need
+  EXTRA_JS = ['dragdrop', 'builder', 'slider']
+
   # includes the correct javascript tags for the current request.
   # if the special symbol :extra has been specified as a required js file,
-  # then this expands to all the scriptalicous files.
+  # then this expands to all the EXTRA_JS files.
   def optional_javascript_tag
     scripts = controller.class.javascript || {}
     js_files = [scripts[:all], scripts[params[:action].to_sym]].flatten.compact
     return unless js_files.any?
     extra = js_files.delete(:extra)
-    js_files = js_files.collect do |jsfile|
-      if ['effects', 'dragdrop', 'controls', 'builder', 'slider'].include? jsfile
+    cache = false
+
+    args = js_files.collect do |jsfile|
+      if MAIN_JS.include? jsfile
+        nil # main js already is included
+      elsif EXTRA_JS.include? jsfile and !extra
         jsfile
       else
         "as_needed/#{jsfile}"
       end
-    end
+    end.compact.uniq
+
     if extra
-      js_files += ['effects', 'dragdrop', 'controls', 'builder', 'slider']
+      args += EXTRA_JS
+      args << {:cache => 'extra'}
     end
-    javascript_include_tag(*js_files)
+    javascript_include_tag(*args)
   end
-  
+
   def crabgrass_javascripts
     lines = []
-    lines << javascript_include_tag('prototype', 'application', :cache => true)
+    lines << javascript_include_tag(MAIN_JS, :cache => 'main')
     lines << optional_javascript_tag
     lines << '<script type="text/javascript">'
     lines << @content_for_script
@@ -157,7 +173,7 @@ module LayoutHelper
     lines << '<![endif]-->'
     lines.join("\n")
   end
-  
+
   ##
   ## BANNER
   ##
@@ -165,7 +181,7 @@ module LayoutHelper
   # banner stuff
   def banner_style
     "background: #{@banner_style.background_color}; color: #{@banner_style.color};" if @banner_style
-  end  
+  end
   def banner_background
     @banner_style.background_color if @banner_style
   end
@@ -241,7 +257,7 @@ module LayoutHelper
   def dialog_page(options = {}, &block)
     block_to_partial('common/dialog_page', options, &block)
   end
-  
+
 
   ##
   ## CUSTOMIZED STUFF
@@ -253,7 +269,7 @@ module LayoutHelper
     if appearance and appearance.masthead_asset
       # use an image
       content_tag :div, :id => 'site_logo_wrapper' do
-        content_tag :a, :href => '/', :alt => current_site.title do 
+        content_tag :a, :href => '/', :alt => current_site.title do
           image_tag(appearance.masthead_asset.url, :id => 'site_logo')
         end
       end

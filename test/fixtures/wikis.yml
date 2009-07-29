@@ -59,6 +59,7 @@ announcement:
   id: 5
   body: there is a new video online now...
   version: 1
+
 for_public:
   id: 6
   body: the body of the wiki, which is text suitable for running through green cloth
